@@ -12,7 +12,7 @@ import {
   faCalendar,
   faMoneyBill,
   faUser,
-  faFileInvoice
+  faFileInvoice,
 } from "@fortawesome/free-solid-svg-icons";
 
 function Driver_Reimbursement() {
@@ -24,8 +24,10 @@ function Driver_Reimbursement() {
   const [downloadMenuVisible, setDownloadMenuVisible] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
   const [isDownloading, setIsDownloading] = useState(false);
+  const [itemsPerPage, setItemsPerPage] = useState(6);
   const navigate = useNavigate();
-  const ITEMS_PER_PAGE = 6;
+
+  const itemsPerPageOptions = [6, 10, 30, 50, 100];
 
   const storedUserData = localStorage.getItem("userData");
   const accessToken = storedUserData ? JSON.parse(storedUserData).access_token : null;
@@ -37,6 +39,10 @@ function Driver_Reimbursement() {
     }
     handleFetch();
   }, [accessToken, navigate]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [itemsPerPage]);
 
   const handleFetch = async () => {
     try {
@@ -63,16 +69,15 @@ function Driver_Reimbursement() {
     }
   };
 
-  // Filter functions
   const filterData = () => {
-    return reimbursementData.filter(item => {
-      const matchesSearch = (
+    return reimbursementData.filter((item) => {
+      const matchesSearch =
         item.expense?.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.expense?.user?.phone_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.expense?.amount?.toString().includes(searchQuery)
-      );
+        item.expense?.amount?.toString().includes(searchQuery);
 
-      const matchesStatus = filterStatus === "all" || 
+      const matchesStatus =
+        filterStatus === "all" ||
         (filterStatus === "paid" && item.is_paid) ||
         (filterStatus === "unpaid" && !item.is_paid);
 
@@ -80,15 +85,14 @@ function Driver_Reimbursement() {
     });
   };
 
-  // Download functions
   const formatDataForExport = (data) => {
-    return data.map(item => ({
-      'Expense Category': item.expense?.category,
-      'Driver': item.expense?.user?.phone_number,
-      'Amount (FRW)': item.expense?.amount,
-      'Status': item.is_paid ? 'Paid' : 'Unpaid',
-      'Date': item.expense?.date,
-      'Created Date': new Date(item.created_at).toLocaleDateString()
+    return data.map((item) => ({
+      "Expense Category": item.expense?.category,
+      Driver: item.expense?.user?.phone_number,
+      "Amount (FRW)": item.expense?.amount,
+      Status: item.is_paid ? "Paid" : "Unpaid",
+      Date: item.expense?.date,
+      "Created Date": new Date(item.created_at).toLocaleDateString(),
     }));
   };
 
@@ -97,33 +101,30 @@ function Driver_Reimbursement() {
     try {
       const doc = new jsPDF();
       const formattedData = formatDataForExport(filterData());
-      
-      // Add title
+
       doc.setFontSize(16);
-      doc.text('Reimbursement Report', 14, 15);
-      
-      // Add metadata
+      doc.text("Reimbursement Report", 14, 15);
+
       doc.setFontSize(10);
       doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 25);
-      
-      // Create table
+
       const headers = Object.keys(formattedData[0]);
-      const data = formattedData.map(row => Object.values(row));
-      
+      const data = formattedData.map((row) => Object.values(row));
+
       doc.autoTable({
         head: [headers],
         body: data,
         startY: 35,
         styles: { fontSize: 8 },
-        headStyles: { fillColor: [41, 128, 185] }
+        headStyles: { fillColor: [41, 128, 185] },
       });
-      
-      doc.save('reimbursements.pdf');
-      setMessage('PDF downloaded successfully');
-      setMessageType('success');
+
+      doc.save("reimbursements.pdf");
+      setMessage("PDF downloaded successfully");
+      setMessageType("success");
     } catch (error) {
-      setMessage('Error generating PDF');
-      setMessageType('error');
+      setMessage("Error generating PDF");
+      setMessageType("error");
     } finally {
       setIsDownloading(false);
       setDownloadMenuVisible(false);
@@ -138,11 +139,11 @@ function Driver_Reimbursement() {
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Reimbursements");
       XLSX.writeFile(workbook, "reimbursements.xlsx");
-      setMessage('Excel file downloaded successfully');
-      setMessageType('success');
+      setMessage("Excel file downloaded successfully");
+      setMessageType("success");
     } catch (error) {
-      setMessage('Error generating Excel file');
-      setMessageType('error');
+      setMessage("Error generating Excel file");
+      setMessageType("error");
     } finally {
       setIsDownloading(false);
       setDownloadMenuVisible(false);
@@ -155,37 +156,35 @@ function Driver_Reimbursement() {
       const formattedData = formatDataForExport(filterData());
       const worksheet = XLSX.utils.json_to_sheet(formattedData);
       const csvContent = XLSX.utils.sheet_to_csv(worksheet);
-      
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = 'reimbursements.csv';
+      link.download = "reimbursements.csv";
       link.click();
-      
-      setMessage('CSV file downloaded successfully');
-      setMessageType('success');
+
+      setMessage("CSV file downloaded successfully");
+      setMessageType("success");
     } catch (error) {
-      setMessage('Error generating CSV file');
-      setMessageType('error');
+      setMessage("Error generating CSV file");
+      setMessageType("error");
     } finally {
       setIsDownloading(false);
       setDownloadMenuVisible(false);
     }
   };
 
-  // Pagination
   const filteredData = filterData();
-  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const currentData = filteredData.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
-  // Status counts
   const countByStatus = {
     all: reimbursementData.length,
-    paid: reimbursementData.filter(item => item.is_paid).length,
-    unpaid: reimbursementData.filter(item => !item.is_paid).length
+    paid: reimbursementData.filter((item) => item.is_paid).length,
+    unpaid: reimbursementData.filter((item) => !item.is_paid).length,
   };
 
   return (
@@ -195,36 +194,64 @@ function Driver_Reimbursement() {
       </h1>
 
       {message && (
-        <div className={`text-center py-2 px-4 mb-4 rounded ${messageType === "success" ? "text-green-500" : "text-red-500"}`}>
+        <div
+          className={`text-center py-2 px-4 mb-4 rounded ${
+            messageType === "success" ? "text-green-500" : "text-red-500"
+          }`}
+        >
           {message}
         </div>
       )}
 
-      {/* Controls Section */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        {/* Filter Buttons */}
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setFilterStatus("all")}
-            className={`px-4 py-2 rounded-lg ${filterStatus === "all" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+            className={`px-4 py-2 rounded-lg ${
+              filterStatus === "all"
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 text-gray-700"
+            }`}
           >
             All ({countByStatus.all})
           </button>
           <button
             onClick={() => setFilterStatus("paid")}
-            className={`px-4 py-2 rounded-lg ${filterStatus === "paid" ? "bg-green-600 text-white" : "bg-gray-200 text-gray-700"}`}
+            className={`px-4 py-2 rounded-lg ${
+              filterStatus === "paid"
+                ? "bg-green-600 text-white"
+                : "bg-gray-200 text-gray-700"
+            }`}
           >
             Paid ({countByStatus.paid})
           </button>
           <button
             onClick={() => setFilterStatus("unpaid")}
-            className={`px-4 py-2 rounded-lg ${filterStatus === "unpaid" ? "bg-yellow-600 text-white" : "bg-gray-200 text-gray-700"}`}
+            className={`px-4 py-2 rounded-lg ${
+              filterStatus === "unpaid"
+                ? "bg-green-600 text-white"
+                : "bg-gray-200 text-gray-700"
+            }`}
           >
             Unpaid ({countByStatus.unpaid})
           </button>
         </div>
 
-        {/* Search and Download */}
+        <div className="flex items-center gap-2">
+          <label className="text-gray-700">Items per page:</label>
+          <select
+            value={itemsPerPage}
+            onChange={(e) => setItemsPerPage(Number(e.target.value))}
+            className="border rounded-lg px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {itemsPerPageOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="flex flex-col md:flex-row gap-2 md:gap-4">
           <div className="relative w-full md:w-auto">
             <input
@@ -234,8 +261,8 @@ function Driver_Reimbursement() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 text-gray-700 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <FontAwesomeIcon 
-              icon={faSearch} 
+            <FontAwesomeIcon
+              icon={faSearch}
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
             />
           </div>
@@ -247,7 +274,7 @@ function Driver_Reimbursement() {
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
             >
               <FontAwesomeIcon icon={faDownload} />
-              {isDownloading ? 'Downloading...' : 'Download'}
+              {isDownloading ? "Downloading..." : "Download"}
             </button>
             {downloadMenuVisible && (
               <div className="absolute right-0 mt-2 py-2 w-48 text-gray-700 bg-white rounded-lg shadow-xl z-10">
@@ -275,75 +302,65 @@ function Driver_Reimbursement() {
         </div>
       </div>
 
-      {/* Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        {currentData.length === 0 ? (
-          <div className="col-span-full text-center py-8 text-gray-500">
-            No reimbursements found
-          </div>
-        ) : (
-          currentData.map((item, index) => (
-            <div key={item.id} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
-              <div className="flex justify-between items-center mb-4">
-                <span className={`px-3 py-1 rounded-full text-sm ${item.is_paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                  {item.is_paid ? 'Paid' : 'Pending'}
-                </span>
-              </div>
-
-              <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faFileInvoice} className="text-gray-400" />
-                  <span className="text-gray-700">{item.expense?.vendor}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faFileInvoice} className="text-gray-400" />
-                  <span className="text-gray-700">{item.expense?.category}</span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faUser} className="text-gray-400" />
-                  <span className="text-gray-700">{item.expense?.user?.phone_number}</span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faMoneyBill} className="text-gray-400" />
-                  <span className="text-gray-700">{item.expense?.amount} FRW</span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faCalendar} className="text-gray-400" />
-                  <span className="text-gray-700">
-                    {new Date(item.created_at).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {currentData.map((item, index) => (
+          <div
+            key={index}
+            className="bg-white shadow-md rounded-lg p-4 border border-gray-200"
+          >
+            <div className="text-gray-700 mb-2">
+              <span className="font-bold">Expense Category:</span> {" "}
+              {item.expense?.category || "N/A"}
             </div>
-          ))
-        )}
+            <div className="text-gray-700 mb-2">
+              <span className="font-bold">Driver:</span> {" "}
+              {item.expense?.user?.phone_number || "N/A"}
+            </div>
+            <div className="text-gray-700 mb-2">
+              <span className="font-bold">Amount:</span> {" "}
+              {item.expense?.amount || "0.00"} FRW
+            </div>
+            <div className="text-gray-700 mb-2">
+              <span className="font-bold">Status:</span> {" "}
+              <span
+                className={
+                  item.is_paid ? "text-green-600" : "text-green-600"
+                }
+              >
+                {item.is_paid ? "Paid" : "Unpaid"}
+              </span>
+            </div>
+            <div className="text-gray-700 mb-2">
+              <span className="font-bold">Date:</span> {" "}
+              {item.expense?.date || "N/A"}
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-4">
-          <button
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 rounded-lg bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Previous
-          </button>
-          <span className="px-4 py-2">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 rounded-lg bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <div className="flex justify-center items-center gap-2 mt-6">
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition-colors"
+          disabled={currentPage === 1}
+        >
+          Previous
+        </button>
+
+        <span className="text-gray-700">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <button
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400 transition-colors"
+          disabled={currentPage === totalPages}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }

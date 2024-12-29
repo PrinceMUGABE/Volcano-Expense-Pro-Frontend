@@ -97,95 +97,97 @@ function DriverProfile() {
   }
 
   return (
-    <div className="p-6 bg-white shadow-md rounded-lg w-1/2">
-      <h1 className="text-2xl font-bold mb-4 text-black text-center">Profile Info</h1>
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="p-6 bg-white shadow-md rounded-lg w-1/2">
+        <h1 className="text-2xl font-bold mb-4 text-black text-center">Profile Info</h1>
 
-      {/* Profile Data */}
-      {!isEditing ? (
-        <>
-          <div className="mb-2">
-            <strong className="text-black">Phone:</strong> <span className="text-gray-700">{userData.phone}</span>
-          </div>
+        {/* Profile Data */}
+        {!isEditing ? (
+          <>
+            <div className="mb-2">
+              <strong className="text-black">Phone:</strong> <span className="text-gray-700">{userData.phone}</span>
+            </div>
 
-          <div className="mb-2">
-            <strong className="text-black">Email:</strong> <span className="text-gray-700">{userData.email}</span>
-          </div>
+            <div className="mb-2">
+              <strong className="text-black">Email:</strong> <span className="text-gray-700">{userData.email}</span>
+            </div>
 
-          <div className="mb-2">
-            <strong className="text-black">Role:</strong> <span className="text-gray-700">{userData.role}</span>
-          </div>
+            <div className="mb-2">
+              <strong className="text-black">Role:</strong> <span className="text-gray-700">{userData.role}</span>
+            </div>
 
-          <div className="mb-2">
-            <strong className="text-black">Created At:</strong> <span className="text-gray-700">{new Date(userData.created_at).toLocaleString()}</span>
-          </div>
+            <div className="mb-2">
+              <strong className="text-black">Created At:</strong> <span className="text-gray-700">{new Date(userData.created_at).toLocaleString()}</span>
+            </div>
 
-          <button
-            onClick={handleEditClick}
-            className="mt-4 px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded"
-          >
-            Edit Profile
-          </button>
-        </>
-      ) : (
-        // Edit Form
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-black" htmlFor="phone_number">Phone</label>
-            <input
-              type="text"
-              id="phone_number"
-              name="phone_number" // Change to `phone_number`
-              value={formData.phone_number} // Use `phone_number`
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded text-gray-700"
-              required
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-black" htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded text-gray-700"
-              required
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-black" htmlFor="role">Role</label>
-            <input
-              type="text"
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              readOnly
-              className="w-full p-2 border border-gray-300 rounded text-gray-700"
-              required
-            />
-          </div>
-
-          <div className="flex justify-end gap-4">
             <button
-              type="button"
               onClick={handleEditClick}
-              className="px-4 py-2 text-white bg-gray-500 hover:bg-gray-600 rounded"
+              className="mt-4 px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded"
             >
-              Cancel
+              Edit Profile
             </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded"
-            >
-              Save Changes
-            </button>
-          </div>
-        </form>
-      )}
+          </>
+        ) : (
+          // Edit Form
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="block text-black" htmlFor="phone_number">Phone</label>
+              <input
+                type="text"
+                id="phone_number"
+                name="phone_number"
+                value={formData.phone_number}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 rounded text-gray-700"
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-black" htmlFor="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 rounded text-gray-700"
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-black" htmlFor="role">Role</label>
+              <input
+                type="text"
+                id="role"
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                readOnly
+                className="w-full p-2 border border-gray-300 rounded text-gray-700"
+                required
+              />
+            </div>
+
+            <div className="flex justify-end gap-4">
+              <button
+                type="button"
+                onClick={handleEditClick}
+                className="px-4 py-2 text-white bg-gray-500 hover:bg-gray-600 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
     </div>
   );
 }
